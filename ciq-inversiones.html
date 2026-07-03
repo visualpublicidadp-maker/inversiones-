@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0E14">
+<title>CIQ · Mis Inversiones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0E14; --surface:#151A24; --surface2:#1C2330; --line:#262E3D;
+    --txt:#E8EBF0; --muted:#8A93A6; --faint:#5B6577;
+    --up:#3DD68C; --down:#F25B5B; --gold:#D4AF37; --blue:#5A9BF0; --purple:#7B61FF; --orange:#F2A93B; --teal:#38C7C4;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--bg);color:var(--txt);font-family:'Plus Jakarta Sans',-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  body{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+  .num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .wrap{max-width:520px;margin:0 auto;padding:0 16px}
+  .green{color:var(--up)}.red{color:var(--down)}
+
+  header{padding:calc(16px + env(safe-area-inset-top)) 0 4px}
+  .brand{display:flex;align-items:baseline;gap:8px}
+  .brand b{font-weight:800;font-size:20px}
+  .brand span{color:var(--gold)}
+  .brand small{color:var(--muted);font-size:12px;font-weight:600;margin-left:auto}
+
+  .hero{margin-top:12px;padding:20px;border-radius:var(--radius);background:radial-gradient(140% 130% at 0% 0%,#1b2434 0%,var(--surface) 62%);border:1px solid var(--line)}
+  .hero .lbl{color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+  .hero .big{font-size:36px;font-weight:800;margin-top:4px}
+  .hero .pl{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:800;margin-top:8px;padding:5px 12px;border-radius:999px}
+  .hero .pl.up{background:rgba(61,214,140,.13);color:var(--up)}
+  .hero .pl.down{background:rgba(242,91,91,.13);color:var(--down)}
+  .kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+  .kpi .k{font-size:9px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+  .kpi .v{font-size:15px;font-weight:800;margin-top:3px}
+
+  section{margin-top:20px}
+  .h{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0 2px 10px;display:flex;align-items:center;gap:6px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:10px}
+
+  /* composición */
+  .comp{display:flex;align-items:center;gap:18px}
+  .comp canvas{flex:none}
+  .legend{flex:1;min-width:0}
+  .leg{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px}
+  .leg .d{width:10px;height:10px;border-radius:4px;flex:none}
+  .leg .n{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .leg .p{margin-left:auto;font-weight:800;font-size:13px}
+
+  /* posiciones */
+  .pos{padding:15px 16px}
+  .pos .top{display:flex;align-items:center;gap:8px}
+  .pos .ava{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#0b0e14;flex:none}
+  .pos .nm{font-weight:800;font-size:16px}
+  .pos .cat{font-size:11px;color:var(--muted);font-weight:600}
+  .pos .plbox{margin-left:auto;text-align:right}
+  .pos .plpct{font-weight:800;font-size:17px}
+  .pos .plamt{font-size:11px;font-weight:700;color:var(--muted)}
+  .bar{height:7px;border-radius:6px;background:var(--surface2);margin-top:12px;overflow:hidden;position:relative}
+  .bar>div{position:absolute;top:0;bottom:0;border-radius:6px}
+  .pos .row{display:flex;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--muted)}
+  .pos .row b{color:var(--txt);font-weight:700}
+  .pos .upd{margin-top:12px;width:100%;padding:10px;border-radius:11px;border:1px dashed var(--line);background:transparent;color:var(--blue);font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
+
+  input,select{width:100%;padding:14px;border-radius:13px;border:1px solid var(--line);background:var(--surface2);color:var(--txt);font-size:16px;font-family:'JetBrains Mono',monospace}
+  input::placeholder{color:var(--faint)}
+  select{font-family:'Plus Jakarta Sans',sans-serif;font-weight:600}
+  label.fl{font-size:11px;color:var(--muted);font-weight:800;display:block;margin:12px 2px 6px;text-transform:uppercase;letter-spacing:.05em}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .seg button{padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);color:var(--muted);font-family:inherit;font-weight:800;font-size:14px;cursor:pointer}
+  .seg button.on-buy{background:rgba(61,214,140,.15);border-color:var(--up);color:var(--up)}
+  .seg button.on-sell{background:rgba(242,91,91,.15);border-color:var(--down);color:var(--down)}
+
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;border:none;border-radius:14px;background:var(--up);color:#05140c;font-weight:800;font-size:15px;font-family:inherit;cursor:pointer;margin-top:14px}
+  .btn:active{transform:scale(.99)}
+  .btn.ghost{background:var(--surface2);color:var(--txt);border:1px solid var(--line)}
+  .btn.gold{background:var(--gold);color:#1a1400}
+  .btn.danger{background:transparent;color:var(--down);border:1px solid var(--line)}
+
+  .mov{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .mov:last-child{border-bottom:none}
+  .mov .ic{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none}
+  .mov .ic.b{background:rgba(61,214,140,.13)}
+  .mov .ic.s{background:rgba(242,91,91,.13)}
+  .mov .nm{font-weight:700;font-size:14px}
+  .mov .dt{font-size:11px;color:var(--muted)}
+  .mov .amt{margin-left:auto;font-weight:800;font-size:14px;text-align:right}
+  .mov .x{color:var(--faint);font-size:18px;padding:0 2px 0 8px;cursor:pointer}
+
+  .empty{color:var(--faint);font-size:13px;text-align:center;padding:22px 8px;line-height:1.6}
+  .mini{font-size:11px;color:var(--faint);margin-top:10px;line-height:1.5}
+  textarea{width:100%;min-height:130px;padding:12px;border-radius:13px;border:1px solid var(--line);background:var(--surface2);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.5}
+
+  nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:rgba(16,20,28,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 0 calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:space-around}
+  nav button{background:none;border:none;color:var(--faint);font-family:inherit;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:2px 10px}
+  nav button.on{color:var(--up)}
+  nav svg{width:22px;height:22px}
+  .view{display:none}
+  .view.on{display:block;animation:f .25s ease}
+  @keyframes f{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  dialog{border:none;border-radius:20px;background:var(--surface);color:var(--txt);padding:20px;width:calc(100% - 40px);max-width:420px;margin:auto}
+  dialog::backdrop{background:rgba(0,0,0,.65)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand"><b>💼 CIQ <span>Inversiones</span></b><small id="hDate"></small></div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ===== RESUMEN ===== -->
+  <div class="view on" id="v-res">
+    <div class="hero">
+      <div class="lbl">Mi portafolio vale hoy</div>
+      <div class="big num" id="hVal">$0</div>
+      <div class="pl up num" id="hPL">—</div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">💰 Invertido</div><div class="v num" id="kInv">$0</div></div>
+      <div class="kpi"><div class="k">📈 Rent. total</div><div class="v num" id="kRent">—</div></div>
+      <div class="kpi"><div class="k">⚡ Anualizada</div><div class="v num" id="kCagr">—</div></div>
+    </div>
+
+    <section>
+      <div class="h">🥧 Composición</div>
+      <div class="card">
+        <div class="comp">
+          <canvas id="donut" width="130" height="130"></canvas>
+          <div class="legend" id="legend"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="h">📊 Evolución del portafolio</div>
+      <div class="card">
+        <canvas id="evo" width="440" height="150" style="width:100%"></canvas>
+        <div class="mini" id="evoNote">Cada vez que actualizas valores, se guarda un punto en la historia.</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="h">🏆 Mejor y peor</div>
+      <div class="card" id="bestWorst"></div>
+    </section>
+  </div>
+
+  <!-- ===== POSICIONES ===== -->
+  <div class="view" id="v-pos">
+    <section>
+      <div class="h">💎 Mis posiciones</div>
+      <div id="posList"></div>
+    </section>
+  </div>
+
+  <!-- ===== REGISTRAR ===== -->
+  <div class="view" id="v-reg">
+    <section>
+      <div class="h">✍️ Nuevo movimiento</div>
+      <div class="card">
+        <div class="seg">
+          <button id="segBuy" class="on-buy" onclick="setType('buy')">🟢 Compré</button>
+          <button id="segSell" onclick="setType('sell')">🔴 Vendí</button>
+        </div>
+        <label class="fl">¿Qué activo?</label>
+        <input id="mAsset" list="assetList" placeholder="IBITCO" style="font-family:inherit;font-weight:700">
+        <datalist id="assetList"></datalist>
+        <label class="fl">Categoría</label>
+        <select id="mCat">
+          <option value="ETF">📈 ETF / Acción</option>
+          <option value="Cripto">₿ Cripto</option>
+          <option value="CDT">🏦 CDT / Renta fija</option>
+          <option value="Préstamo">🤝 Préstamo</option>
+          <option value="USD">💵 Dólares</option>
+          <option value="Otro">📦 Otro</option>
+        </select>
+        <div class="row2">
+          <div><label class="fl">¿Cuánto? COP</label><input id="mAmt" class="num" inputmode="numeric" placeholder="5.000.000"></div>
+          <div><label class="fl">¿Cuándo?</label><input id="mDate" type="date"></div>
+        </div>
+        <div class="row2">
+          <div><label class="fl">Precio unit. <span style="color:var(--faint)">(opc)</span></label><input id="mPrice" class="num" inputmode="decimal" placeholder="118.000"></div>
+          <div><label class="fl">Unidades <span style="color:var(--faint)">(opc)</span></label><input id="mUnits" class="num" inputmode="decimal" placeholder="42"></div>
+        </div>
+        <button class="btn" onclick="addMov()">Guardar ✓</button>
+      </div>
+    </section>
+    <section>
+      <div class="h">🕐 Últimos movimientos</div>
+      <div class="card" id="movList"></div>
+    </section>
+  </div>
+
+  <!-- ===== DATOS ===== -->
+  <div class="view" id="v-data">
+    <section>
+      <div class="h">🤖 Compartir con Claude</div>
+      <div class="card">
+        <p style="font-size:13px;color:var(--muted);line-height:1.6">Toca el botón, pega en el chat, y Claude analiza tu portafolio real.</p>
+        <button class="btn gold" onclick="copyExport()">📋 Copiar resumen para Claude</button>
+        <textarea id="expBox" readonly placeholder="Aquí aparece el resumen…" style="margin-top:12px"></textarea>
+      </div>
+    </section>
+    <section>
+      <div class="h">💾 Respaldo</div>
+      <div class="card">
+        <button class="btn ghost" onclick="backupJSON()">Copiar respaldo (JSON)</button>
+        <label class="fl" style="margin-top:14px">Restaurar</label>
+        <textarea id="restBox" placeholder="Pega aquí el JSON…"></textarea>
+        <button class="btn ghost" onclick="restoreJSON()">Restaurar</button>
+        <button class="btn danger" onclick="wipeAll()">Borrar todo</button>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<dialog id="dlgVal">
+  <div style="font-weight:800;font-size:17px" id="dvName">Actualizar valor</div>
+  <p style="font-size:12px;color:var(--muted);margin-top:5px">¿Cuánto vale HOY esta posición? (míralo en Trii o el banco)</p>
+  <label class="fl">Valor total COP</label>
+  <input id="dvVal" class="num" inputmode="numeric" placeholder="0">
+  <button class="btn" onclick="saveVal()">Guardar ✓</button>
+  <button class="btn ghost" onclick="dlgVal.close()">Cancelar</button>
+</dialog>
+
+<nav>
+  <button class="on" data-v="res" onclick="go('res',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>Resumen</button>
+  <button data-v="pos" onclick="go('pos',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 7v6h-6"/></svg>Posiciones</button>
+  <button data-v="reg" onclick="go('reg',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Registrar</button>
+  <button data-v="data" onclick="go('data',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>Datos</button>
+</nav>
+
+<script>
+const KEY='ciqreg1';
+let DB=load();
+function load(){
+  try{const s=localStorage.getItem(KEY);if(s){const d=JSON.parse(s);if(!d.hist)d.hist=[];return d;}}catch(e){}
+  return {movs:[],vals:{},hist:[]};
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){}}
+
+const fmt=n=>'$'+Math.round(n).toLocaleString('es-CO');
+const fmtS=n=>{const a=Math.abs(n);if(a>=1e6)return '$'+(n/1e6).toLocaleString('es-CO',{maximumFractionDigits:1})+'M';return fmt(n);};
+const parseN=s=>Number(String(s).replace(/,/g,'.').replace(/[^\d.-]/g,''))||0;
+const parseCOP=s=>Number(String(s).replace(/[^\d-]/g,''))||0;
+const today=()=>new Date().toISOString().slice(0,10);
+document.getElementById('mDate').value=today();
+document.getElementById('hDate').textContent=new Date().toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'});
+
+const COLORS=['#3DD68C','#5A9BF0','#D4AF37','#7B61FF','#F2A93B','#38C7C4','#F25B5B','#8A93A6'];
+const CATCOLOR={'ETF':'#3DD68C','Cripto':'#7B61FF','CDT':'#5A9BF0','Préstamo':'#D4AF37','USD':'#38C7C4','Otro':'#8A93A6'};
+
+let mType='buy';
+function setType(t){mType=t;
+  document.getElementById('segBuy').className=t==='buy'?'on-buy':'';
+  document.getElementById('segSell').className=t==='sell'?'on-sell':'';}
+
+// ---- derived ----
+function assets(){
+  const a={};
+  DB.movs.forEach(m=>{
+    if(!a[m.asset])a[m.asset]={asset:m.asset,cat:m.cat,in:0,out:0,units:0,first:m.date};
+    const x=a[m.asset];
+    if(m.type==='buy'){x.in+=m.amt;x.units+=(m.units||0);}
+    else{x.out+=m.amt;x.units-=(m.units||0);}
+    if(m.date<x.first)x.first=m.date;
+    x.cat=m.cat;
+  });
+  return Object.values(a);
+}
+function active(){return assets().filter(x=>(x.in-x.out)>1000||DB.vals[x.asset]>0);}
+function curOf(x){return DB.vals[x.asset]!==undefined?DB.vals[x.asset]:Math.max(x.in-x.out,0);}
+function totals(){
+  let inv=0,out=0,cur=0,first=null;
+  active().forEach(x=>{inv+=x.in;out+=x.out;cur+=curOf(x);if(!first||x.first<first)first=x.first;});
+  return{inv,out,cur,n:active().length,first};
+}
+function yearsBetween(d1,d2){return Math.max((new Date(d2)-new Date(d1))/31557600000,1/365);}
+
+// ---- render ----
+function render(){
+  const t=totals();
+  const pl=t.cur+t.out-t.inv;
+  const pct=t.inv>0?pl/t.inv*100:0;
+  document.getElementById('hVal').textContent=fmt(t.cur);
+  const plEl=document.getElementById('hPL');
+  plEl.textContent=(pl>=0?'▲ +':'▼ −')+fmt(Math.abs(pl)).slice(1)+' ('+(pl>=0?'+':'')+pct.toFixed(1)+'%)';
+  plEl.className='pl num '+(pl>=0?'up':'down');
+  document.getElementById('kInv').textContent=fmtS(t.inv);
+  const kR=document.getElementById('kRent');
+  kR.textContent=(pct>=0?'+':'')+pct.toFixed(1)+'%';kR.className='v num '+(pct>=0?'green':'red');
+  let cagrTxt='—';
+  if(t.first&&t.inv>0){
+    const yrs=yearsBetween(t.first,today());
+    if(yrs>=0.1){const c=(Math.pow((t.cur+t.out)/t.inv,1/yrs)-1)*100;cagrTxt=(c>=0?'+':'')+c.toFixed(1)+'%';
+      document.getElementById('kCagr').className='v num '+(c>=0?'green':'red');}
+  }
+  document.getElementById('kCagr').textContent=cagrTxt;
+  drawDonut();drawEvo();renderBW();renderPos();renderMovs();renderDatalist();
+}
+
+function drawDonut(){
+  const list=active();const t=totals();
+  const cv=document.getElementById('donut'),x=cv.getContext('2d');
+  x.clearRect(0,0,130,130);
+  const leg=document.getElementById('legend');leg.innerHTML='';
+  if(!t.cur){x.beginPath();x.arc(65,65,55,0,7);x.strokeStyle='#262E3D';x.lineWidth=16;x.stroke();
+    leg.innerHTML='<div class="empty" style="padding:8px">Registra tu primera inversión 👇</div>';return;}
+  // by category
+  const cats={};list.forEach(p=>{cats[p.cat]=(cats[p.cat]||0)+curOf(p);});
+  const entries=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  let a0=-Math.PI/2;
+  entries.forEach(([cat,v])=>{
+    const frac=v/t.cur, a1=a0+frac*Math.PI*2;
+    x.beginPath();x.arc(65,65,55,a0+.03,a1-.03);x.strokeStyle=CATCOLOR[cat]||'#8A93A6';x.lineWidth=16;x.lineCap='round';x.stroke();
+    a0=a1;
+    leg.innerHTML+=`<div class="leg"><span class="d" style="background:${CATCOLOR[cat]||'#8A93A6'}"></span>
+      <span class="n">${cat}</span><span class="p num">${(frac*100).toFixed(0)}%</span></div>`;
+  });
+}
+
+function drawEvo(){
+  const cv=document.getElementById('evo'),x=cv.getContext('2d');
+  const W=cv.width,H=cv.height;x.clearRect(0,0,W,H);
+  const h=DB.hist;
+  if(h.length<2){document.getElementById('evoNote').style.display='block';
+    x.fillStyle='#5B6577';x.font='600 12px Plus Jakarta Sans';x.textAlign='center';
+    x.fillText(h.length===0?'Aún sin historia — actualiza valores para empezar':'Un punto guardado — vuelve mañana y actualiza de nuevo',W/2,H/2);return;}
+  document.getElementById('evoNote').style.display='none';
+  const vals=h.map(p=>p.v);
+  const min=Math.min(...vals)*0.98,max=Math.max(...vals)*1.02;
+  const px=i=>18+(W-30)*i/(h.length-1);
+  const py=v=>H-16-(H-34)*(v-min)/(max-min||1);
+  // area
+  x.beginPath();x.moveTo(px(0),py(vals[0]));
+  vals.forEach((v,i)=>x.lineTo(px(i),py(v)));
+  x.lineTo(px(h.length-1),H-14);x.lineTo(px(0),H-14);x.closePath();
+  const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(61,214,140,.25)');g.addColorStop(1,'rgba(61,214,140,0)');
+  x.fillStyle=g;x.fill();
+  // line
+  x.beginPath();x.moveTo(px(0),py(vals[0]));
+  vals.forEach((v,i)=>x.lineTo(px(i),py(v)));
+  x.strokeStyle='#3DD68C';x.lineWidth=2.5;x.lineJoin='round';x.stroke();
+  // last point
+  x.beginPath();x.arc(px(h.length-1),py(vals[h.length-1]),4,0,7);x.fillStyle='#3DD68C';x.fill();
+  // labels
+  x.fillStyle='#8A93A6';x.font='700 10px JetBrains Mono';x.textAlign='left';
+  x.fillText(fmtS(vals[0]),16,py(vals[0])-8);
+  x.textAlign='right';x.fillText(fmtS(vals[vals.length-1]),W-8,py(vals[vals.length-1])-8);
+}
+
+function renderBW(){
+  const el=document.getElementById('bestWorst');
+  const list=active().filter(x=>x.in>0);
+  if(list.length<1){el.innerHTML='<div class="empty">Aquí verás tu mejor y peor inversión 🏆</div>';return;}
+  const withP=list.map(x=>{const c=curOf(x);return{...x,pct:(c+x.out-x.in)/x.in*100,pl:c+x.out-x.in};}).sort((a,b)=>b.pct-a.pct);
+  const b=withP[0],w=withP[withP.length-1];
+  let html=`<div style="display:flex;gap:12px">
+    <div style="flex:1;text-align:center;padding:10px;background:rgba(61,214,140,.08);border-radius:14px">
+      <div style="font-size:20px">🥇</div><div style="font-weight:800;font-size:14px;margin-top:2px">${b.asset}</div>
+      <div class="num green" style="font-weight:800;font-size:16px">${b.pct>=0?'+':''}${b.pct.toFixed(1)}%</div>
+      <div class="num" style="font-size:10px;color:var(--muted)">${b.pl>=0?'+':''}${fmtS(b.pl)}</div></div>`;
+  if(withP.length>1){
+    html+=`<div style="flex:1;text-align:center;padding:10px;background:rgba(242,91,91,.08);border-radius:14px">
+      <div style="font-size:20px">🐢</div><div style="font-weight:800;font-size:14px;margin-top:2px">${w.asset}</div>
+      <div class="num ${w.pct>=0?'green':'red'}" style="font-weight:800;font-size:16px">${w.pct>=0?'+':''}${w.pct.toFixed(1)}%</div>
+      <div class="num" style="font-size:10px;color:var(--muted)">${w.pl>=0?'+':''}${fmtS(w.pl)}</div></div>`;
+  }
+  el.innerHTML=html+'</div>';
+}
+
+function renderPos(){
+  const el=document.getElementById('posList');el.innerHTML='';
+  const list=active();const t=totals();
+  if(!list.length){el.innerHTML='<div class="card"><div class="empty">Todavía no hay posiciones.<br>Ve a <b>Registrar</b> y guarda tu primera compra 🚀</div></div>';return;}
+  list.sort((a,b)=>curOf(b)-curOf(a));
+  list.forEach((x,i)=>{
+    const cur=curOf(x), hasVal=DB.vals[x.asset]!==undefined;
+    const pl=cur+x.out-x.in, pct=x.in>0?pl/x.in*100:0;
+    const peso=t.cur>0?cur/t.cur*100:0;
+    const yrs=yearsBetween(x.first,today());
+    const cagr=(x.in>0&&cur+x.out>0&&yrs>=0.15)?(Math.pow((cur+x.out)/x.in,1/yrs)-1)*100:null;
+    const color=COLORS[i%COLORS.length];
+    el.innerHTML+=`<div class="card pos">
+      <div class="top">
+        <div class="ava" style="background:${color}">${x.asset.slice(0,3)}</div>
+        <div><div class="nm">${x.asset}</div><div class="cat">${x.cat} · ${peso.toFixed(0)}% del portafolio</div></div>
+        <div class="plbox"><div class="plpct num ${pl>=0?'green':'red'}">${pl>=0?'+':''}${pct.toFixed(1)}%</div>
+        <div class="plamt num">${pl>=0?'+':''}${fmtS(pl)}</div></div>
+      </div>
+      <div class="bar"><div style="width:${Math.min(peso,100)}%;background:${color}"></div></div>
+      <div class="row"><span>Invertido <b class="num">${fmt(x.in)}</b></span><span>Vale hoy <b class="num">${hasVal?fmt(cur):'—'}</b></span></div>
+      <div class="row"><span>Desde <b class="num">${x.first}</b></span><span>Anualizada <b class="num">${cagr!==null?(cagr>=0?'+':'')+cagr.toFixed(1)+'%':'—'}</b></span></div>
+      <button class="upd" onclick="openVal('${x.asset.replace(/'/g,"\\'")}')">💲 ${hasVal?'Actualizar valor de hoy':'¿Cuánto vale hoy? Toca aquí'}</button>
+    </div>`;
+  });
+}
+
+function renderMovs(){
+  const el=document.getElementById('movList');el.innerHTML='';
+  if(!DB.movs.length){el.innerHTML='<div class="empty">Sin movimientos aún.</div>';return;}
+  [...DB.movs].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).slice(0,25).forEach(m=>{
+    el.innerHTML+=`<div class="mov">
+      <div class="ic ${m.type==='buy'?'b':'s'}">${m.type==='buy'?'🟢':'🔴'}</div>
+      <div><div class="nm">${m.asset}</div><div class="dt num">${m.date}${m.price?' · @'+Number(m.price).toLocaleString('es-CO'):''}</div></div>
+      <div class="amt num ${m.type==='buy'?'':'red'}">${m.type==='buy'?'+':'−'}${fmtS(m.amt)}</div>
+      <span class="x" onclick="delMov(${m.id})">×</span></div>`;
+  });
+}
+function renderDatalist(){
+  const dl=document.getElementById('assetList');dl.innerHTML='';
+  [...new Set(DB.movs.map(m=>m.asset))].forEach(a=>{dl.innerHTML+=`<option value="${a}">`;});
+}
+
+// ---- actions ----
+function addMov(){
+  const asset=document.getElementById('mAsset').value.trim().toUpperCase();
+  const amt=parseCOP(document.getElementById('mAmt').value);
+  if(!asset||amt<=0)return;
+  DB.movs.push({
+    id:Date.now(), type:mType, asset,
+    cat:document.getElementById('mCat').value,
+    amt, date:document.getElementById('mDate').value||today(),
+    price:parseN(document.getElementById('mPrice').value)||null,
+    units:parseN(document.getElementById('mUnits').value)||null,
+  });
+  ['mAsset','mAmt','mPrice','mUnits'].forEach(i=>document.getElementById(i).value='');
+  snapshot();save();render();go('pos',document.querySelector('nav button[data-v=pos]'));
+}
+function delMov(id){if(!confirm('¿Eliminar este movimiento?'))return;DB.movs=DB.movs.filter(m=>m.id!==id);snapshot();save();render();}
+
+let valAsset=null;
+function openVal(a){valAsset=a;document.getElementById('dvName').textContent=a;
+  document.getElementById('dvVal').value=DB.vals[a]?Math.round(DB.vals[a]).toLocaleString('es-CO'):'';
+  dlgVal.showModal();}
+function saveVal(){
+  const v=parseCOP(document.getElementById('dvVal').value);
+  if(v>0)DB.vals[valAsset]=v;else delete DB.vals[valAsset];
+  snapshot();save();render();dlgVal.close();
+}
+function snapshot(){
+  const t=totals();if(t.cur<=0)return;
+  const d=today();
+  const last=DB.hist[DB.hist.length-1];
+  if(last&&last.d===d)last.v=t.cur;else DB.hist.push({d,v:t.cur});
+  if(DB.hist.length>120)DB.hist=DB.hist.slice(-120);
+}
+
+// ---- export ----
+function exportText(){
+  const t=totals();const pl=t.cur+t.out-t.inv;
+  let s='PORTAFOLIO CIQ · '+today()+'\n';
+  s+='Invertido: '+fmt(t.inv)+' | Vale hoy: '+fmt(t.cur)+' | Retirado: '+fmt(t.out)+' | G/P: '+(pl>=0?'+':'')+fmt(pl)+' ('+(t.inv>0?(pl/t.inv*100).toFixed(1):0)+'%)\n\nPOSICIONES:\n';
+  active().forEach(x=>{
+    const cur=curOf(x);const p=cur+x.out-x.in;
+    s+='- '+x.asset+' ['+x.cat+'] invertido '+fmt(x.in)+(x.out?' retirado '+fmt(x.out):'')+', vale '+fmt(cur)+', G/P '+(p>=0?'+':'')+fmt(p)+' ('+(x.in>0?(p/x.in*100).toFixed(1):'0')+'%), desde '+x.first+(x.units>0?', unidades '+x.units:'')+'\n';
+  });
+  s+='\nMOVIMIENTOS (últimos 20):\n';
+  [...DB.movs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,20).forEach(m=>{
+    s+=m.date+' '+(m.type==='buy'?'COMPRA':'VENTA')+' '+m.asset+' '+fmt(m.amt)+(m.price?' @'+m.price:'')+'\n';
+  });
+  if(DB.hist.length>1){s+='\nEVOLUCIÓN: ';DB.hist.slice(-10).forEach(p=>{s+=p.d+'='+fmtS(p.v)+' ';});s+='\n';}
+  return s;
+}
+function copyExport(){
+  const s=exportText();
+  document.getElementById('expBox').value=s;
+  navigator.clipboard&&navigator.clipboard.writeText(s).then(()=>{},()=>{});
+  const box=document.getElementById('expBox');box.focus();box.select();
+}
+function backupJSON(){
+  const s=JSON.stringify(DB);
+  document.getElementById('restBox').value=s;
+  navigator.clipboard&&navigator.clipboard.writeText(s);
+  alert('Respaldo copiado. Guárdalo en Notas ✓');
+}
+function restoreJSON(){
+  try{const d=JSON.parse(document.getElementById('restBox').value);
+    if(d&&Array.isArray(d.movs)){if(!d.hist)d.hist=[];DB=d;save();render();alert('Restaurado ✓');}
+  }catch(e){alert('JSON inválido');}
+}
+function wipeAll(){if(confirm('¿Borrar TODO? No se puede deshacer.')){DB={movs:[],vals:{},hist:[]};save();render();}}
+
+function go(v,btn){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
+  document.getElementById('v-'+v).classList.add('on');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');window.scrollTo(0,0);
+}
+['mAmt','dvVal'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',e=>{
+    const n=parseCOP(e.target.value);e.target.value=n?n.toLocaleString('es-CO'):'';
+  });
+});
+render();
+</script>
+</body>
+</html>
